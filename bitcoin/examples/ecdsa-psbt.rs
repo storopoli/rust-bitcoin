@@ -32,7 +32,7 @@ use std::collections::BTreeMap;
 use std::fmt;
 use std::str::FromStr;
 
-use bitcoin::bip32::{ChildNumber, DerivationPath, Fingerprint, IntoDerivationPath, Xpriv, Xpub};
+use bitcoin::bip32::{ChildNumber, DerivationPath, Fingerprint, IntoDerivationPath, NormalChildNumber, Xpriv, Xpub};
 use bitcoin::consensus::encode;
 use bitcoin::locktime::absolute;
 use bitcoin::psbt::{self, Input, Psbt, PsbtSighashType};
@@ -255,7 +255,7 @@ impl WatchOnly {
         &self,
         secp: &Secp256k1<C>,
     ) -> Result<(CompressedPublicKey, Address, DerivationPath)> {
-        let path = [ChildNumber::ONE_NORMAL, ChildNumber::ZERO_NORMAL];
+        let path = [NormalChildNumber::new(1), NormalChildNumber::new(0)];
         let derived = self.account_0_xpub.derive_pub(secp, &path);
 
         let pk = derived.to_pub();

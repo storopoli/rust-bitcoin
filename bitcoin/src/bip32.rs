@@ -332,6 +332,39 @@ pub struct DerivationPath(Vec<ChildNumber>);
 #[cfg(feature = "serde")]
 crate::serde_utils::serde_string_impl!(DerivationPath, "a BIP-32 derivation path");
 
+impl TryFrom<DerivationPath> for Vec<NormalChildNumber> {
+    type Error = Error;
+    fn try_from(value: DerivationPath) -> Result<Self, Self::Error> {
+        let mut ret = Vec::new();
+        for cnum in value.0.iter() {
+            match *cnum {
+                ChildNumber::Normal(normal) => {
+                    ret.push(normal);
+                },
+                _ => return Err(Error::InvalidChildNumberFormat),
+            }
+        }
+        Ok(ret)
+    }
+}
+
+
+impl TryFrom<DerivationPath> for Vec<HardenedChildNumber> {
+    type Error = Error;
+    fn try_from(value: DerivationPath) -> Result<Self, Self::Error> {
+        let mut ret = Vec::new();
+        for cnum in value.0.iter() {
+            match *cnum {
+                ChildNumber::Hardened(hardened) => {
+                    ret.push(hardened);
+                },
+                _ => return Err(Error::InvalidChildNumberFormat),
+            }
+        }
+        Ok(ret)
+    }
+}
+
 impl<I> Index<I> for DerivationPath
 where
     Vec<ChildNumber>: Index<I>,
