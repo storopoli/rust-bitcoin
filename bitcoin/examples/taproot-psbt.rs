@@ -391,10 +391,11 @@ impl BenefactorWallet {
         // We use some other derivation path in this example for our inheritance protocol. The important thing is to ensure
         // that we use an unhardened path so we can make use of xpubs.
         let derivation_path = DerivationPath::from_str(&format!("101/1/0/0/{}", self.next))?;
+        let child_num: Vec<NormalChildNumber> = derivation_path.clone().try_into()?;
         let internal_keypair =
             self.master_xpriv.derive_priv(&self.secp, &derivation_path).to_keypair(&self.secp);
         let beneficiary_key =
-            self.beneficiary_xpub.derive_pub(&self.secp, &derivation_path).to_x_only_pub();
+            self.beneficiary_xpub.derive_pub(&self.secp, &child_num).to_x_only_pub();
 
         // Build up the leaf script and combine with internal key into a taproot commitment
         let script = Self::time_lock_script(lock_time, beneficiary_key);
@@ -480,12 +481,15 @@ impl BenefactorWallet {
             // that we use an unhardened path so we can make use of xpubs.
             let new_derivation_path =
                 DerivationPath::from_str(&format!("101/1/0/0/{}", self.next))?;
+
+            let child_num: Vec<NormalChildNumber> = new_derivation_path.clone().try_into()?;
+            
             let new_internal_keypair = self
                 .master_xpriv
                 .derive_priv(&self.secp, &new_derivation_path)
                 .to_keypair(&self.secp);
             let beneficiary_key =
-                self.beneficiary_xpub.derive_pub(&self.secp, &new_derivation_path).to_x_only_pub();
+                self.beneficiary_xpub.derive_pub(&self.secp, &child_num).to_x_only_pub();
 
             // Build up the leaf script and combine with internal key into a taproot commitment
             let lock_time = absolute::LockTime::from_height(
