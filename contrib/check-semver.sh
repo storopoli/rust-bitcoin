@@ -7,6 +7,7 @@
 set -euo pipefail
 set -x #remove me
 
+NIGHTLY=$(cat nightly-version)
 # Our docs have broken intra doc links if all features are not enabled.
 RUSTDOCFLAGS="-Z unstable-options --document-private-items --document-hidden-items --output-format=json --cap-lints=allow"
 
@@ -17,6 +18,8 @@ else
 fi
 
 main() {
+    need_nightly
+
     # on current commit
     generate_json_files_all_features "bitcoin" "current"
     generate_json_files_no_default_features "bitcoin" "current"
@@ -70,7 +73,7 @@ main() {
 
 # Run cargo doc
 run_cargo_doc() {
-    RUSTDOCFLAGS="$RUSTDOCFLAGS" cargo doc --no-deps "$@"
+    RUSTDOCFLAGS="$RUSTDOCFLAGS" cargo +"$NIGHTLY" doc --no-deps "$@"
 }
 
 # Run cargo semver-check
@@ -79,7 +82,7 @@ run_cargo_semver_check() {
     local variant="$2"
 
     echo "Running cargo semver-checks for $crate $variant"
-    cargo semver-checks -v --baseline-rustdoc "$crate-master-$variant.json" --current-rustdoc "$crate-current-$variant.json" > "$crate-$variant-semver.txt" 2>&1
+    cargo +"$NIGHTLY" semver-checks -v --baseline-rustdoc "$crate-master-$variant.json" --current-rustdoc "$crate-current-$variant.json"
 }
 
 # Uses cargo doc to generate JSON files that cargo semver-checks can use.
@@ -129,6 +132,18 @@ check_for_breaking_changes() {
     if ! [ -f semver-break ]; then
        echo "No breaking changes found"
     fi
+}
+
+need_nightly() {
+    cargo_ver=$(cargo +"$NIGHTLY" --version)
+    if echo "$cargo_ver" | grep -q -v nightly; then
+        err "Need a nightly compiler; have $cargo_ver"
+    fi
+}
+
+err() {
+    echo "$1" >&2
+    exit 1
 }
 
 #
