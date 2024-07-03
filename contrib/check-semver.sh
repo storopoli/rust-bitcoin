@@ -81,7 +81,10 @@ run_cargo_semver_check() {
     local variant="$2"
 
     echo "Running cargo semver-checks for $crate $variant"
+    # hack to not fail on errors
+    set +e
     cargo +"$NIGHTLY" semver-checks -v --baseline-rustdoc "$crate-master-$variant.json" --current-rustdoc "$crate-current-$variant.json" > "$crate-$variant-semver.txt" 2>&1
+    set -e
 }
 
 # Uses cargo doc to generate JSON files that cargo semver-checks can use.

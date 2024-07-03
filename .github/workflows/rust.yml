@@ -324,7 +324,6 @@ jobs:
         run: cargo binstall cargo-semver-checks --no-confirm
       - name: "Run semver checker script"
         run: ./contrib/check-semver.sh
-        continue-on-error: true
       - name: "Add PR label to breaking changes"
         uses: actions-ecosystem/action-add-labels@v1
         if: ${{ hashFiles('semver-break') != '' }}
