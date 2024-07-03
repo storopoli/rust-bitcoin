@@ -5,7 +5,6 @@
 # files.
 
 set -euo pipefail
-set -x #remove me
 
 NIGHTLY=$(cat nightly-version)
 # Our docs have broken intra doc links if all features are not enabled.
@@ -82,7 +81,7 @@ run_cargo_semver_check() {
     local variant="$2"
 
     echo "Running cargo semver-checks for $crate $variant"
-    cargo +"$NIGHTLY" semver-checks -v --baseline-rustdoc "$crate-master-$variant.json" --current-rustdoc "$crate-current-$variant.json"
+    cargo +"$NIGHTLY" semver-checks -v --baseline-rustdoc "$crate-master-$variant.json" --current-rustdoc "$crate-current-$variant.json" > "$crate-$variant-semver.txt" 2>&1
 }
 
 # Uses cargo doc to generate JSON files that cargo semver-checks can use.
