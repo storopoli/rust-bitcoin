@@ -8,14 +8,12 @@
 use core::cmp::Ordering;
 use core::fmt;
 
-use io::{BufRead, Write};
 #[cfg(all(test, mutate))]
 use mutagen::mutate;
 use units::parse::{self, PrefixedHexError, UnprefixedHexError};
 
 #[cfg(doc)]
 use crate::absolute;
-use crate::consensus::encode::{self, Decodable, Encodable};
 
 #[rustfmt::skip]                // Keep public re-exports separate.
 #[doc(inline)]
@@ -26,14 +24,14 @@ pub use units::locktime::absolute::{
 /// An absolute lock time value, representing either a block height or a UNIX timestamp (seconds
 /// since epoch).
 ///
-/// Used for transaction lock time (`nLockTime` in Bitcoin Core and [`crate::Transaction::lock_time`]
+/// Used for transaction lock time (`nLockTime` in Bitcoin Core and `Transaction::lock_time`
 /// in this library) and also for the argument to opcode 'OP_CHECKLOCKTIMEVERIFY`.
 ///
 /// ### Note on ordering
 ///
 /// Locktimes may be height- or time-based, and these metrics are incommensurate; there is no total
 /// ordering on locktimes. We therefore have implemented [`PartialOrd`] but not [`Ord`].
-/// For [`crate::Transaction`], which has a locktime field, we implement a total ordering to make
+/// For `Transaction`, which has a locktime field, we implement a total ordering to make
 /// it easy to store transactions in sorted data structures, and use the locktime's 32-bit integer
 /// consensus encoding to order it. We also implement [`ordered::ArbitraryOrd`] if the "ordered"
 /// feature is enabled.
@@ -87,7 +85,7 @@ pub enum LockTime {
 }
 
 impl LockTime {
-    /// If [`crate::Transaction::lock_time`] is set to zero it is ignored, in other words a
+    /// If `Transaction::lock_time` is set to zero it is ignored, in other words a
     /// transaction with nLocktime==0 is able to be included immediately in any block.
     pub const ZERO: LockTime = LockTime::Blocks(Height::ZERO);
 
@@ -200,7 +198,7 @@ impl LockTime {
     /// blocktime based lock it is checked against `time`.
     ///
     /// A 'timelock constraint' refers to the `n` from `n OP_CHEKCLOCKTIMEVERIFY`, this constraint
-    /// is satisfied if a transaction with nLockTime ([`crate::Transaction::lock_time`]) set to
+    /// is satisfied if a transaction with nLockTime (`Transaction::lock_time`) set to
     /// `height`/`time` is valid.
     ///
     /// # Examples
@@ -343,21 +341,6 @@ impl fmt::Display for LockTime {
                 Seconds(ref t) => fmt::Display::fmt(t, f),
             }
         }
-    }
-}
-
-impl Encodable for LockTime {
-    #[inline]
-    fn consensus_encode<W: Write + ?Sized>(&self, w: &mut W) -> Result<usize, io::Error> {
-        let v = self.to_consensus_u32();
-        v.consensus_encode(w)
-    }
-}
-
-impl Decodable for LockTime {
-    #[inline]
-    fn consensus_decode<R: BufRead + ?Sized>(r: &mut R) -> Result<Self, encode::Error> {
-        u32::consensus_decode(r).map(LockTime::from_consensus)
     }
 }
 

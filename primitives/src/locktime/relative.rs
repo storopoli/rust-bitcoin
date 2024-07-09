@@ -22,7 +22,7 @@ pub use units::locktime::relative::{Height, Time, TimeOverflowError};
 
 /// A relative lock time value, representing either a block height or time (512 second intervals).
 ///
-/// Used for sequence numbers (`nSequence` in Bitcoin Core and [`crate::TxIn::sequence`]
+/// Used for sequence numbers (`nSequence` in Bitcoin Core and `TxIn::sequence`
 /// in this library) and also for the argument to opcode 'OP_CHECKSEQUENCEVERIFY`.
 ///
 /// ### Note on ordering
