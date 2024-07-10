@@ -4,8 +4,8 @@ on:   # yamllint disable-line rule:truthy
 name: Check semver breaks
 
 jobs:
-  API:
-    name: API - stable toolchain
+  PR:
+    name: PR Semver - nightly toolchain
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -21,7 +21,7 @@ jobs:
       - name: "Binstall cargo-semver-checks"
         run: cargo binstall cargo-semver-checks --no-confirm
       - name: "Run semver checker script"
-        run: ./contrib/check-semver.sh
+        run: ./contrib/check-semver-pr.sh
       - name: "Add PR label to breaking changes"
         uses: actions-ecosystem/action-add-labels@v1
         if: ${{ hashFiles('semver-break') != '' }}
