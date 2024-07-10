@@ -34,3 +34,31 @@ jobs:
           message: |
             :rotating_light: API BREAKING CHANGE DETECTED
 
+  Feature:
+    name: Non additive cargo features - stable toolchain
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+    steps:
+      - name: "Checkout repo"
+        uses: actions/checkout@v4
+      - name: "Install Rustup"
+        uses: dtolnay/rust-toolchain@stable
+      - name: "Install cargo-binstall"
+        uses: cargo-bins/cargo-binstall@main
+      - name: "Binstall cargo-semver-checks"
+        run: cargo binstall cargo-semver-checks --no-confirm
+      - name: "Run semver checker script"
+        run: ./contrib/check-semver-feature.sh
+        continue-on-error: true
+      - name: "Add PR label to breaking changes"
+        uses: actions-ecosystem/action-add-labels@v1
+        if: ${{ hashFiles('non-additive-cargo') != '' }}
+        with:
+          labels: "non-additive cargo features"
+      - name: Comment PR
+        uses: thollander/actions-comment-pull-request@v2
+        if: ${{ hashFiles('non-additive-cargo') != '' }}
+        with:
+          message: |
+            :rotating_light: Non-additive Cargo Features
