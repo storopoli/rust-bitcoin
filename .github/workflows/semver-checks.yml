@@ -37,17 +37,19 @@ jobs:
         run: cargo binstall cargo-semver-checks@0.32.0 --no-confirm
       - name: "Run semver checker script"
         run: ./contrib/check-semver-pr.sh
-      - name: "Add PR label to breaking changes"
-        uses: actions-ecosystem/action-add-labels@v1
+      - name: "Save PR Number"
+        if: ${{ hashFiles('semver-break') != '' }}
+        env:
+          PR_NUMBER: ${{ github.event.number }}
+        run: |
+          mkdir -p ./pr-semver-break
+          echo $PR_NUMBER > ./pr-semver-break/semver-break-NR
+      - name: "Upload PR Number"
+        uses: actions/upload-artifact@v4
         if: ${{ hashFiles('semver-break') != '' }}
         with:
-          labels: "API break"
-      - name: Comment PR
-        uses: thollander/actions-comment-pull-request@v2
-        if: ${{ hashFiles('semver-break') != '' }}
-        with:
-          message: |
-            :rotating_light: API BREAKING CHANGE DETECTED
+          name: pr-semver-break
+          path: pr-semver-break/
 
   Feature:
     name: Non additive cargo features - stable toolchain
@@ -69,15 +71,16 @@ jobs:
         run: cargo binstall cargo-semver-checks@0.32.0 --no-confirm
       - name: "Run semver checker script"
         run: ./contrib/check-semver-feature.sh
-        continue-on-error: true
-      - name: "Add PR label to breaking changes"
-        uses: actions-ecosystem/action-add-labels@v1
+      - name: "Save PR Number"
+        if: ${{ hashFiles('non-additive-cargo') != '' }}
+        env:
+          PR_NUMBER: ${{ github.event.number }}
+        run: |
+          mkdir -p ./pr-non-additive-cargo
+          echo $PR_NUMBER > ./pr-non-additive-cargo/non-additive-cargo-NR
+      - name: "Upload PR Number"
+        uses: actions/upload-artifact@v4
         if: ${{ hashFiles('non-additive-cargo') != '' }}
         with:
-          labels: "non-additive cargo features"
-      - name: Comment PR
-        uses: thollander/actions-comment-pull-request@v2
-        if: ${{ hashFiles('non-additive-cargo') != '' }}
-        with:
-          message: |
-            :rotating_light: Non-additive Cargo Features
+          name: pr-non-additive-cargo
+          path: pr-non-additive-cargo/

@@ -119,14 +119,7 @@ check_for_non_additive_cargo_features() {
     done
     if ! [ -f non-additive-cargo ]; then
        echo "No non-additive cargo features found"
-    else
-        err "Non-additive cargo features found"
     fi
-}
-
-err() {
-    echo "$1" >&2
-    exit 1
 }
 
 #
