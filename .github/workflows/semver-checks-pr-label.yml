@@ -15,7 +15,7 @@ jobs:
         with:
           script: |
             let fs = require('fs');
-            let allArtifacts = await github.actions.listWorkflowRunArtifacts({
+            let allArtifacts = await github.rest.actions.listWorkflowRunArtifacts({
                owner: context.repo.owner,
                repo: context.repo.repo,
                run_id: context.payload.workflow_run.id,
@@ -25,10 +25,10 @@ jobs:
             });
             for (let artifact of matchArtifacts) {
               console.log(artifact.name);
-              let download = await github.actions.downloadArtifact({
+              let download = await github.rest.actions.downloadArtifact({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                artifact_id: matchArtifact.id,
+                artifact_id: artifact.id,
                 archive_format: 'zip',
               });
               fs.writeFileSync('${{github.workspace}}/' + artifact.name + '.zip', Buffer.from(download.data));
@@ -44,13 +44,13 @@ jobs:
           script: |
             var fs = require('fs');
             var issue_number = Number(fs.readFileSync('./semver-break-NR'));
-            await github.issues.createComment({
+            await github.rest.issues.createComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: issue_number,
               body: ':rotating_light: API BREAKING CHANGE DETECTED'
             });
-            await github.issues.addLabels({
+            await github.rest.issues.addLabels({
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: issue_number,
@@ -64,13 +64,13 @@ jobs:
           script: |
             var fs = require('fs');
             var issue_number = Number(fs.readFileSync('./non-additive-cargo-NR'));
-            await github.issues.createComment({
+            await github.rest.issues.createComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: issue_number,
               body: ':rotating_light: NON-ADDITIVE CARGO FEATURES DETECTED'
             });
-            await github.issues.addLabels({
+            await github.rest.issues.addLabels({
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: issue_number,
